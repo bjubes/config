@@ -12,23 +12,25 @@ type TestConfig struct {
 	PROD    bool
 }
 
-var config = TestConfig{
+var config_struct = TestConfig{
 	DB_HOST: "host",
 	DB_PORT: 1,
 	PROD:    true,
 }
 
-func (c *TestConfig) GetEnvInt(field string) int {
+var config_iface Configurator = config_struct
+
+func (c TestConfig) GetEnvInt(field string) int {
 	//in real project would be config.GetEnvInt(...)
 	return GetEnvInt(c, field)
 }
 
-func (c *TestConfig) GetEnvString(field string) string {
+func (c TestConfig) GetEnvString(field string) string {
 	//in real project would be config.GetEnvString(...)
 	return GetEnvString(c, field)
 }
 
-func (c *TestConfig) GetEnvBool(field string) bool {
+func (c TestConfig) GetEnvBool(field string) bool {
 	//in real project would be config.GetEnvBool(...)
 	return GetEnvBool(c, field)
 }
@@ -36,20 +38,20 @@ func (c *TestConfig) GetEnvBool(field string) bool {
 // End setup
 
 func TestReadValues(t *testing.T) {
-	host := getString(config, "DB_HOST")
-	port := getInt(config, "DB_PORT")
-	prod := getBool(config, "PROD")
+	host := getString(config_iface, "DB_HOST")
+	port := getInt(config_iface, "DB_PORT")
+	prod := getBool(config_iface, "PROD")
 
-	if host != config.DB_HOST {
-		t.Fatalf("Getting string value failed. Got '%v'. want '%v'", host, config.DB_HOST)
+	if host != config_struct.DB_HOST {
+		t.Fatalf("Getting string value failed. Got '%v'. want '%v'", host, config_struct.DB_HOST)
 	}
 
-	if port != config.DB_PORT {
-		t.Fatalf("Getting int value failed. Got '%v'. want '%v'", port, config.DB_PORT)
+	if port != config_struct.DB_PORT {
+		t.Fatalf("Getting int value failed. Got '%v'. want '%v'", port, config_struct.DB_PORT)
 	}
 
-	if prod != config.PROD {
-		t.Fatalf("Getting bool value failed. Got '%v'. want '%v'", port, config.PROD)
+	if prod != config_struct.PROD {
+		t.Fatalf("Getting bool value failed. Got '%v'. want '%v'", port, config_struct.PROD)
 	}
 }
 
@@ -58,9 +60,9 @@ func TestEnvOverridesConfig(t *testing.T) {
 	os.Setenv("DB_PORT", "2")
 	os.Setenv("PROD", "false")
 
-	host := config.GetEnvString("DB_HOST")
-	port := config.GetEnvInt("DB_PORT")
-	prod := config.GetEnvBool("PROD")
+	host := config_iface.GetEnvString("DB_HOST")
+	port := config_iface.GetEnvInt("DB_PORT")
+	prod := config_iface.GetEnvBool("PROD")
 
 	if host != "newhost" {
 		t.Fatalf("Getting string value failed. Got '%v'. want '%v'", host, "newhost")
@@ -81,20 +83,20 @@ func TestConfigFallbackToEnv(t *testing.T) {
 	os.Unsetenv("DB_PORT")
 	os.Unsetenv("PROD")
 
-	host := config.GetEnvString("DB_HOST")
-	port := config.GetEnvInt("DB_PORT")
-	prod := config.GetEnvBool("PROD")
+	host := config_iface.GetEnvString("DB_HOST")
+	port := config_iface.GetEnvInt("DB_PORT")
+	prod := config_iface.GetEnvBool("PROD")
 
-	if host != config.DB_HOST {
-		t.Fatalf("Getting string value failed. Got '%v'. want '%v'", host, config.DB_HOST)
+	if host != config_struct.DB_HOST {
+		t.Fatalf("Getting string value failed. Got '%v'. want '%v'", host, config_struct.DB_HOST)
 	}
 
-	if port != config.DB_PORT {
-		t.Fatalf("Getting int value failed. Got '%v'. want '%v'", port, config.DB_PORT)
+	if port != config_struct.DB_PORT {
+		t.Fatalf("Getting int value failed. Got '%v'. want '%v'", port, config_struct.DB_PORT)
 	}
 
-	if prod != config.PROD {
-		t.Fatalf("Getting bool value failed. Got '%v'. want '%v'", port, config.DB_PORT)
+	if prod != config_struct.PROD {
+		t.Fatalf("Getting bool value failed. Got '%v'. want '%v'", port, config_struct.DB_PORT)
 	}
 
 }
@@ -106,7 +108,7 @@ func TestWrongIntFieldCausesPanic(t *testing.T) {
 		}
 	}()
 
-	value := getInt(config, "DOES_NOT_EXIST")
+	value := getInt(config_iface, "DOES_NOT_EXIST")
 	use(value)
 }
 func TestWrongStringFieldCausesPanic(t *testing.T) {
@@ -116,7 +118,7 @@ func TestWrongStringFieldCausesPanic(t *testing.T) {
 		}
 	}()
 
-	value := getString(config, "DOES_NOT_EXIST")
+	value := getString(config_iface, "DOES_NOT_EXIST")
 	use(value)
 }
 
@@ -127,7 +129,7 @@ func TestWrongBoolFieldCausesPanic(t *testing.T) {
 		}
 	}()
 
-	value := getBool(config, "DOES_NOT_EXIST")
+	value := getBool(config_iface, "DOES_NOT_EXIST")
 	use(value)
 }
 
