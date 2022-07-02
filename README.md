@@ -1,4 +1,4 @@
-# Config
+# Config [![Go Reference](https://pkg.go.dev/badge/github.com/bjubes/config.svg)](https://pkg.go.dev/github.com/bjubes/config)
 
 A go package for creating default configuration variables that can be overridden by environment variables.
 
@@ -22,6 +22,7 @@ go get github.com/bjubes/config
 		PROD:    false,
 	}
 	```
+
 2. Make your custom struct implement the `Configurator` interface using the following code (just copy and paste)
    ```go
 	func (c MyConfig) GetEnvInt(field string) int {
@@ -34,6 +35,7 @@ go get github.com/bjubes/config
 		return config.GetEnvBool(c, field)
 	}
    ```
+
 3. Retrieve a value using the methods on your config instance 
     ```go
 	host := myConfig.GetEnvString("DB_HOST")
