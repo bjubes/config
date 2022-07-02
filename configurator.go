@@ -10,6 +10,9 @@ import (
 	"strings"
 )
 
+// for backwards compatability with go versions <1.18
+type any interface{}
+
 type Configurator interface {
 	GetEnvInt(field string) int
 	GetEnvString(field string) string
