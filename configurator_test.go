@@ -133,7 +133,7 @@ func TestWrongBoolFieldCausesPanic(t *testing.T) {
 	use(value)
 }
 
-func TestBoolWithVariousTrues(t *testing.T) {
+func TestBoolWithVariousEnvStrings(t *testing.T) {
 	falses := []string{
 		"false", "off", "0",
 	}

@@ -17,9 +17,9 @@ go get github.com/bjubes/config
 		PROD    bool
 	}
 	var myConfig config.Configurator = MyConfig{
-		DB_HOST: "host",
-		DB_PORT: 1,
-		PROD:    true,
+		DB_HOST: "localhost",
+		DB_PORT: 5432,
+		PROD:    false,
 	}
 	```
 2. Make your custom struct implement the `Configurator` interface using the following code (just copy and paste)
@@ -41,16 +41,16 @@ go get github.com/bjubes/config
 	prod := myConfig.GetEnvBool("PROD")
 	```
 
-Values will default to what they are set to in the struct, but will be overridden by environment variables if they are set to values, provided they match the type. See type matching rules below.
+Values will default to what they are set to in the struct instance, but will be overridden by environment variables if they are set.
+Environment variables must match the type specified. For specifics, see [type matching rules](#type-matching-rules) below.
 
 Since the `myConfig` instance has a type of `Configurator`, none of the public fields are accesssable. This forces retreiving values through the `GetEnv` methods, so you never accidentally grab the default value without checking for the environment variable first.
 
 
 ### Type matching rules
 
-**string** - Environment value will be used as long as the environment variable is set, even if its an empty string.
+**string** - Environment value will be used as long as it is set, even if its an empty string.
 
-**int** - Environment value will be used if the value is an integer, using`strconv.Atoi`.
+**int** - Environment value will be used if the value is an integer, using [`strconv.Atoi`](https://pkg.go.dev/strconv#Atoi).
 
-**bool** - Environment value will be valid if the environment variable is set. If it is set, it will be true unless the value is one of `false`, `0`, or `off` (case insenstive).
-
+**bool** - Environment value will be used as long as the environment variable is set. If it is set, it will be true unless the value is one of `false`, `0`, or `off` (case insenstive).
