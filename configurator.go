@@ -44,7 +44,7 @@ func GetEnvBool(c any, field string) bool {
 		return getBool(c, field)
 	}
 	v := strings.ToLower(value)
-	return (v == "on" || v == "true" || v == "1")
+	return !(v == "off" || v == "false" || v == "0")
 }
 
 // GetEnvString gets a string from the environment, falling back to the same field name in the config struct.

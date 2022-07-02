@@ -52,4 +52,5 @@ Since the `myConfig` instance has a type of `Configurator`, none of the public f
 
 **int** - Environment value will be used if the value is an integer, using`strconv.Atoi`.
 
-**bool** - Environment value will be valid if the environment variable is set. If it is set, it will be true if the value is one of `true`, `1`, `on` (case insenstive). Otherwise it will be false. 
+**bool** - Environment value will be valid if the environment variable is set. If it is set, it will be true unless the value is one of `false`, `0`, or `off` (case insenstive).
+
