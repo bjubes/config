@@ -18,7 +18,7 @@ type Configurator interface {
 
 // GetEnvInt gets an int from the environment, falling back to the same field name in the config struct.
 // If it doesn't exist in either, the function will log an error then exit 1
-func GetEnvInt(c any, field string) int {
+func GetEnvInt(config Configurator, field string) int {
 	defer func() {
 		if r := recover(); r != nil {
 			log.Fatalln(r)
@@ -26,14 +26,14 @@ func GetEnvInt(c any, field string) int {
 	}()
 	value, err := strconv.Atoi(os.Getenv(field))
 	if err != nil {
-		value = getInt(c, field)
+		value = getInt(config, field)
 	}
 	return value
 }
 
 // GetEnvBool gets a bool from the environment, falling back to the same field name in the config struct.
 // If it doesn't exist in either, the function will log an error then exit 1
-func GetEnvBool(c any, field string) bool {
+func GetEnvBool(config Configurator, field string) bool {
 	defer func() {
 		if r := recover(); r != nil {
 			log.Fatalln(r)
@@ -41,7 +41,7 @@ func GetEnvBool(c any, field string) bool {
 	}()
 	value, exists := os.LookupEnv(field)
 	if !exists {
-		return getBool(c, field)
+		return getBool(config, field)
 	}
 	v := strings.ToLower(value)
 	return !(v == "off" || v == "false" || v == "0")
@@ -49,7 +49,7 @@ func GetEnvBool(c any, field string) bool {
 
 // GetEnvString gets a string from the environment, falling back to the same field name in the config struct.
 // If it doesn't exist in either, the function will log an error then exit 1
-func GetEnvString(c any, field string) string {
+func GetEnvString(config Configurator, field string) string {
 	defer func() {
 		if r := recover(); r != nil {
 			log.Fatalln(r)
@@ -57,7 +57,7 @@ func GetEnvString(c any, field string) string {
 	}()
 	value, exists := os.LookupEnv(field)
 	if !exists {
-		value = getString(c, field)
+		value = getString(config, field)
 	}
 	return value
 }
