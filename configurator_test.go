@@ -12,7 +12,7 @@ type TestConfig struct {
 	PROD    bool
 }
 
-var config_struct = TestConfig{
+var config_struct = &TestConfig{
 	DB_HOST: "host",
 	DB_PORT: 1,
 	PROD:    true,
@@ -141,14 +141,14 @@ func TestBoolWithVariousEnvStrings(t *testing.T) {
 		"", "anything", "true", "on", "1",
 	}
 
-	config_struct.PROD = false
+	config_struct.PROD = true
 	for _, elem := range falses {
 		os.Setenv("PROD", elem)
 		if config_iface.GetEnvBool("PROD") {
 			t.Fatalf("setting env to '%v' should be interpreted bool as false", elem)
 		}
 	}
-	config_struct.PROD = true
+	config_struct.PROD = false
 	for _, elem := range trues {
 		os.Setenv("PROD", elem)
 		if !config_iface.GetEnvBool("PROD") {
