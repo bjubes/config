@@ -7,7 +7,6 @@ import (
 	"reflect"
 	"regexp"
 	"strconv"
-	"strings"
 )
 
 // for backwards compatability with go versions <1.18
@@ -42,12 +41,11 @@ func GetEnvBool(config Configurator, field string) bool {
 			log.Fatalln(r)
 		}
 	}()
-	value, exists := os.LookupEnv(field)
-	if !exists {
-		return getBool(config, field)
+	value, err := strconv.ParseBool(os.Getenv(field))
+	if err != nil {
+		value = getBool(config, field)
 	}
-	v := strings.ToLower(value)
-	return !(v == "off" || v == "false" || v == "0")
+	return value
 }
 
 // GetEnvString gets a string from the environment, falling back to the same field name in the config struct.

@@ -50,9 +50,10 @@ Since the `myConfig` instance has a type of `Configurator`, none of the public f
 
 
 ### Type matching rules
+_If the environment variable doesn't meet these rules the default value will be used instead._
 
 **string** - Environment value will be used as long as it is set, even if its an empty string.
 
-**int** - Environment value will be used if the value is an integer, using [`strconv.Atoi`](https://pkg.go.dev/strconv#Atoi).
+**int** - Environment value will be used if the value is an integer, as determined by [`strconv.Atoi`](https://pkg.go.dev/strconv#Atoi).
 
-**bool** - Environment value will be used as long as the environment variable is set. If it is set, it will be true unless the value is one of `false`, `0`, or `off` (case insenstive).
+**bool** - Environment value will be used if the value is a bool, as determined by [`strconv.ParseBool`](https://pkg.go.dev/strconv#ParseBool). Accepted values are: 1, t, T, TRUE, true, True, 0, f, F, FALSE, false, False.

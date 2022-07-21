@@ -135,24 +135,45 @@ func TestWrongBoolFieldCausesPanic(t *testing.T) {
 
 func TestBoolWithVariousEnvStrings(t *testing.T) {
 	falses := []string{
-		"false", "off", "0",
+		"0", "f", "F", "FALSE", "false", "False",
 	}
 	trues := []string{
-		"", "anything", "true", "on", "1",
+		"1", "t", "T", "TRUE", "true", "True",
 	}
 
 	config_struct.PROD = true
 	for _, elem := range falses {
 		os.Setenv("PROD", elem)
 		if config_iface.GetEnvBool("PROD") {
-			t.Fatalf("setting env to '%v' should be interpreted bool as false", elem)
+			t.Fatalf("setting boolean env to '%v' should be interpreted bool as false", elem)
 		}
 	}
 	config_struct.PROD = false
 	for _, elem := range trues {
 		os.Setenv("PROD", elem)
 		if !config_iface.GetEnvBool("PROD") {
-			t.Fatalf("setting env to '%v' should be interpreted bool as true", elem)
+			t.Fatalf("setting boolean env to '%v' should be interpreted bool as true", elem)
+		}
+	}
+}
+
+func TestBoolWithBadEnvStrings(t *testing.T) {
+	invalid_bool_strings := []string{
+		"off", "on", "yes", "no", "y", "n", "nope", "nada", "anything", "",
+	}
+
+	config_struct.PROD = true
+	for _, elem := range invalid_bool_strings {
+		os.Setenv("PROD", elem)
+		if !config_iface.GetEnvBool("PROD") {
+			t.Fatalf("setting boolean env to '%v' should fallback to default value", elem)
+		}
+	}
+	config_struct.PROD = false
+	for _, elem := range invalid_bool_strings {
+		os.Setenv("PROD", elem)
+		if config_iface.GetEnvBool("PROD") {
+			t.Fatalf("setting boolean env to '%v' should fallback to default value", elem)
 		}
 	}
 }
