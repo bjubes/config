@@ -7,23 +7,20 @@ import (
 
 // Setup dummy config object. Good example of how to do in a real project
 type TestConfig struct {
-	DB_HOST string
-	DB_PORT int
-	PROD    bool
+	DB_HOST  string
+	DB_PORT  int
+	PROD     bool
+	COOLDOWN float64
 }
 
 var config_struct = &TestConfig{
-	DB_HOST: "host",
-	DB_PORT: 1,
-	PROD:    true,
+	DB_HOST:  "host",
+	DB_PORT:  1,
+	PROD:     true,
+	COOLDOWN: 0.5,
 }
 
 var config_iface Configurator = config_struct
-
-func (c TestConfig) GetEnvInt(field string) int {
-	//in real project would be config.GetEnvInt(...)
-	return GetEnvInt(c, field)
-}
 
 func (c TestConfig) GetEnvString(field string) string {
 	//in real project would be config.GetEnvString(...)
@@ -35,12 +32,23 @@ func (c TestConfig) GetEnvBool(field string) bool {
 	return GetEnvBool(c, field)
 }
 
+func (c TestConfig) GetEnvInt(field string) int {
+	//in real project would be config.GetEnvInt(...)
+	return GetEnvInt(c, field)
+}
+
+func (c TestConfig) GetEnvFloat(field string) float64 {
+	//in real project would be config.GetEnvFloat(...)
+	return GetEnvFloat(c, field)
+}
+
 // End setup
 
 func TestReadValues(t *testing.T) {
 	host := getString(config_iface, "DB_HOST")
 	port := getInt(config_iface, "DB_PORT")
 	prod := getBool(config_iface, "PROD")
+	cooldown := getFloat(config_iface, "COOLDOWN")
 
 	if host != config_struct.DB_HOST {
 		t.Fatalf("Getting string value failed. Got '%v'. want '%v'", host, config_struct.DB_HOST)
@@ -53,16 +61,22 @@ func TestReadValues(t *testing.T) {
 	if prod != config_struct.PROD {
 		t.Fatalf("Getting bool value failed. Got '%v'. want '%v'", port, config_struct.PROD)
 	}
+
+	if cooldown != config_struct.COOLDOWN {
+		t.Fatalf("Getting float value failed. Got '%v'. want '%v'", port, config_struct.COOLDOWN)
+	}
 }
 
 func TestEnvOverridesConfig(t *testing.T) {
 	os.Setenv("DB_HOST", "newhost")
 	os.Setenv("DB_PORT", "2")
 	os.Setenv("PROD", "false")
+	os.Setenv("COOLDOWN", "0.6")
 
 	host := config_iface.GetEnvString("DB_HOST")
 	port := config_iface.GetEnvInt("DB_PORT")
 	prod := config_iface.GetEnvBool("PROD")
+	cooldown := config_iface.GetEnvFloat("COOLDOWN")
 
 	if host != "newhost" {
 		t.Fatalf("Getting string value failed. Got '%v'. want '%v'", host, "newhost")
@@ -76,16 +90,22 @@ func TestEnvOverridesConfig(t *testing.T) {
 		t.Fatalf("Getting bool value failed. Got '%v'. want '%v'", prod, false)
 	}
 
+	if cooldown != 0.6 {
+		t.Fatalf("Getting float value failed. Got '%v'. want '%v'", cooldown, 0.6)
+	}
+
 }
 
 func TestConfigFallbackToEnv(t *testing.T) {
 	os.Unsetenv("DB_HOST")
 	os.Unsetenv("DB_PORT")
 	os.Unsetenv("PROD")
+	os.Unsetenv("COOLDOWN")
 
 	host := config_iface.GetEnvString("DB_HOST")
 	port := config_iface.GetEnvInt("DB_PORT")
 	prod := config_iface.GetEnvBool("PROD")
+	cooldown := config_iface.GetEnvFloat("COOLDOWN")
 
 	if host != config_struct.DB_HOST {
 		t.Fatalf("Getting string value failed. Got '%v'. want '%v'", host, config_struct.DB_HOST)
@@ -97,6 +117,10 @@ func TestConfigFallbackToEnv(t *testing.T) {
 
 	if prod != config_struct.PROD {
 		t.Fatalf("Getting bool value failed. Got '%v'. want '%v'", port, config_struct.DB_PORT)
+	}
+
+	if cooldown != config_struct.COOLDOWN {
+		t.Fatalf("Getting float value failed. Got '%v'. want '%v'", port, config_struct.COOLDOWN)
 	}
 
 }
@@ -130,6 +154,17 @@ func TestWrongBoolFieldCausesPanic(t *testing.T) {
 	}()
 
 	value := getBool(config_iface, "DOES_NOT_EXIST")
+	use(value)
+}
+
+func TestWrongFloatFieldCausesPanic(t *testing.T) {
+	defer func() {
+		if r := recover(); r == nil {
+			t.Errorf("Reading non existant field did not cause panic")
+		}
+	}()
+
+	value := getFloat(config_iface, "DOES_NOT_EXIST")
 	use(value)
 }
 
