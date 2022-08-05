@@ -46,7 +46,7 @@ go get github.com/bjubes/config
 	host := myConfig.GetEnvString("DB_HOST")
 	port := myConfig.GetEnvInt("DB_PORT")
 	prod := myConfig.GetEnvBool("PROD")
-	cool := myConfig.GetEnvBool("COOLDOWN")
+	cool := myConfig.GetEnvFloat("COOLDOWN")
 	```
 
 Values will default to what they are set to in the struct instance, but will be overridden by environment variables if they are set.
