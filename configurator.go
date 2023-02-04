@@ -1,7 +1,6 @@
 package config
 
 import (
-	"fmt"
 	"log"
 	"os"
 	"reflect"
@@ -24,7 +23,7 @@ type Configurator interface {
 func GetEnvString(config Configurator, field string) string {
 	defer func() {
 		if r := recover(); r != nil {
-			log.Fatalln(r)
+			log.Panicf("configurator has no field named '%s'", field)
 		}
 	}()
 	value, exists := os.LookupEnv(field)
@@ -39,7 +38,7 @@ func GetEnvString(config Configurator, field string) string {
 func GetEnvBool(config Configurator, field string) bool {
 	defer func() {
 		if r := recover(); r != nil {
-			log.Fatalln(r)
+			log.Panicf("configurator has no field named '%s'", field)
 		}
 	}()
 	value, err := strconv.ParseBool(os.Getenv(field))
@@ -54,7 +53,7 @@ func GetEnvBool(config Configurator, field string) bool {
 func GetEnvInt(config Configurator, field string) int {
 	defer func() {
 		if r := recover(); r != nil {
-			log.Fatalln(r)
+			log.Panicf("configurator has no field named '%s'", field)
 		}
 	}()
 	value, err := strconv.Atoi(os.Getenv(field))
@@ -69,7 +68,7 @@ func GetEnvInt(config Configurator, field string) int {
 func GetEnvFloat(config Configurator, field string) float64 {
 	defer func() {
 		if r := recover(); r != nil {
-			log.Fatalln(r)
+			log.Panicf("configurator has no field named '%s'", field)
 		}
 	}()
 	value, err := strconv.ParseFloat(os.Getenv(field), 64)
@@ -89,7 +88,7 @@ func getString(c any, field string) string {
 	result := field_value.String()
 	re := regexp.MustCompile(`<[a-zA-Z]*\sValue>`)
 	if re.MatchString(result) {
-		panic(fmt.Sprintf("env var not in config struct: `%v`", field))
+		log.Panicf("configurator has no field named '%s'", field)
 	}
 	return result
 }
@@ -116,7 +115,7 @@ func getNonString(c any, field string) reflect.Value {
 	defer func() {
 		//catch panic when field does not exist
 		if r := recover(); r != nil {
-			panic(fmt.Sprintf("env var not in config struct: `%v`", field))
+			log.Panicf("configurator has no field named '%s'", field)
 		}
 	}()
 	c_value := reflect.ValueOf(c)
