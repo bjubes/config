@@ -213,6 +213,36 @@ func TestBoolWithBadEnvStrings(t *testing.T) {
 	}
 }
 
+func TestPanicMessageIncludesFieldName(t *testing.T) {
+	panicCheck := func(f func()) {
+		field_name := "DOES_NOT_EXIST"
+		defer func() {
+			r := recover()
+			if r == nil {
+				t.Errorf("Reading non existant field did not cause panic")
+			} else {
+				switch v := r.(type) {
+				case string:
+					if !strings.Contains(v, field_name) {
+						t.Errorf("Panic msg should contain field name '%s'. Got '%v'", field_name, r)
+					}
+				case error:
+					if !strings.Contains(v.Error(), "DOES_NOT_EXIST") {
+						t.Errorf("Panic msg should contain field name '%s'. Got '%v'", field_name, r)
+					}
+				default:
+					t.Errorf("Panic's type is unkown. Cannot check error msg. Type is '%T'", r)
+				}
+			}
+		}()
+		f()
+	}
+	panicCheck(func() { config_iface.GetEnvInt("DOES_NOT_EXIST") })
+	panicCheck(func() { config_iface.GetEnvFloat("DOES_NOT_EXIST") })
+	panicCheck(func() { config_iface.GetEnvString("DOES_NOT_EXIST") })
+	panicCheck(func() { config_iface.GetEnvBool("DOES_NOT_EXIST") })
+}
+
 func use(vals ...any) {
 	for _, val := range vals {
 		_ = val
