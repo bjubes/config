@@ -88,7 +88,7 @@ func getString(c any, field string) string {
 	result := field_value.String()
 	re := regexp.MustCompile(`<[a-zA-Z]*\sValue>`)
 	if re.MatchString(result) {
-		log.Panicf("env var '%v'not in config struct", field)
+		log.Panicf("configurator has no field named '%s'", field)
 	}
 	return result
 }
@@ -115,7 +115,7 @@ func getNonString(c any, field string) reflect.Value {
 	defer func() {
 		//catch panic when field does not exist
 		if r := recover(); r != nil {
-			log.Panicf("env var '%v'not in config struct", field)
+			log.Panicf("configurator has no field named '%s'", field)
 		}
 	}()
 	c_value := reflect.ValueOf(c)
