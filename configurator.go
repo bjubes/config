@@ -23,7 +23,7 @@ type Configurator interface {
 func GetEnvString(config Configurator, field string) string {
 	defer func() {
 		if r := recover(); r != nil {
-			log.Panicf("configurator has no field named '%s'", field)
+			log.Panicf("configurator has no string field named '%s'", field)
 		}
 	}()
 	value, exists := os.LookupEnv(field)
@@ -38,6 +38,9 @@ func GetEnvString(config Configurator, field string) string {
 func GetEnvBool(config Configurator, field string) bool {
 	defer func() {
 		if r := recover(); r != nil {
+			if reflect.ValueOf(config).FieldByName(field).IsValid() {
+				log.Panicf("configurator field '%s' is not a bool", field)
+			}
 			log.Panicf("configurator has no field named '%s'", field)
 		}
 	}()
@@ -53,6 +56,9 @@ func GetEnvBool(config Configurator, field string) bool {
 func GetEnvInt(config Configurator, field string) int {
 	defer func() {
 		if r := recover(); r != nil {
+			if reflect.ValueOf(config).FieldByName(field).IsValid() {
+				log.Panicf("configurator field '%s' is not an int", field)
+			}
 			log.Panicf("configurator has no field named '%s'", field)
 		}
 	}()
@@ -68,6 +74,9 @@ func GetEnvInt(config Configurator, field string) int {
 func GetEnvFloat(config Configurator, field string) float64 {
 	defer func() {
 		if r := recover(); r != nil {
+			if reflect.ValueOf(config).FieldByName(field).IsValid() {
+				log.Panicf("configurator field '%s' is not a float", field)
+			}
 			log.Panicf("configurator has no field named '%s'", field)
 		}
 	}()

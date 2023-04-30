@@ -244,6 +244,47 @@ func TestPanicMessageIncludesFieldName(t *testing.T) {
 	panicCheck(func() { config_iface.GetEnvBool("DOES_NOT_EXIST") })
 }
 
+func TestPanicOnExistingFieldWrongType(t *testing.T) {
+	var field_name, field_type string
+	panicCheck := func(f func()) {
+		defer func() {
+			r := recover()
+			if r == nil {
+				t.Errorf("Reading field using wrong type did not cause panic")
+			} else {
+				switch v := r.(type) {
+				case string:
+					if !strings.Contains(v, field_name) {
+						t.Errorf("Panic msg should contain field name '%s'. Got '%v'", field_name, r)
+					}
+					if !strings.Contains(v, field_type) {
+						t.Errorf("Panic msg should contain field type. Got '%v'", r)
+					}
+				case error:
+					if !strings.Contains(v.Error(), "DOES_NOT_EXIST") {
+						t.Errorf("Panic msg should contain field name '%s'. Got '%v'", field_name, r)
+					}
+					if !strings.Contains(v.Error(), field_type) {
+						t.Errorf("Panic msg should contain field type. Got '%v'", r)
+					}
+				default:
+					t.Errorf("Panic's type is unkown. Cannot check error msg. Type is '%T'", r)
+				}
+			}
+		}()
+		f()
+	}
+	field_name = "DB_HOST"
+	field_type = "int"
+	panicCheck(func() { config_iface.GetEnvInt("DB_HOST") })
+	field_type = "float"
+	panicCheck(func() { config_iface.GetEnvFloat("DB_HOST") })
+	field_type = "bool"
+	panicCheck(func() { config_iface.GetEnvBool("DB_HOST") })
+	field_name = "DB_PORT"
+	field_type = "string"
+	panicCheck(func() { config_iface.GetEnvString("DB_PORT") })
+}
 func use(vals ...any) {
 	for _, val := range vals {
 		_ = val
