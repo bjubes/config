@@ -26,7 +26,7 @@ go get github.com/bjubes/config
 	```
 
 2. Make your custom struct implements the `Configurator` interface using the following code (just copy and paste)
-   ```go
+	```go
 	func (c MyConfig) GetEnvString(field string) string {
 		return config.GetEnvString(c, field)
 	}
@@ -39,10 +39,10 @@ go get github.com/bjubes/config
 	func (c MyConfig) GetEnvFloat(field string) float64 {
 		return config.GetEnvFloat(c, field)
 	}
-   ```
+	```
 
 3. Retrieve a value using the methods on your config instance 
-    ```go
+	```go
 	host := myConfig.GetEnvString("DB_HOST")
 	port := myConfig.GetEnvInt("DB_PORT")
 	prod := myConfig.GetEnvBool("PROD")

@@ -19,7 +19,7 @@ type Configurator interface {
 }
 
 // GetEnvString gets a string from the environment, falling back to the same field name in the config struct.
-// If it doesn't exist in either, the function will log an error then exit 1
+// If it doesn't exist in either, the function will log an error and panic
 func GetEnvString(config Configurator, field string) string {
 	defer func() {
 		if r := recover(); r != nil {
@@ -34,7 +34,7 @@ func GetEnvString(config Configurator, field string) string {
 }
 
 // GetEnvBool gets a bool from the environment, falling back to the same field name in the config struct.
-// If it doesn't exist in either, the function will log an error then exit 1
+// If it doesn't exist in either, the function will log an error and panic
 func GetEnvBool(config Configurator, field string) bool {
 	defer func() {
 		if r := recover(); r != nil {
@@ -52,7 +52,7 @@ func GetEnvBool(config Configurator, field string) bool {
 }
 
 // GetEnvInt gets an int from the environment, falling back to the same field name in the config struct.
-// If it doesn't exist in either, the function will log an error then exit 1
+// If it doesn't exist in either, the function will log an error and panic
 func GetEnvInt(config Configurator, field string) int {
 	defer func() {
 		if r := recover(); r != nil {
@@ -70,7 +70,7 @@ func GetEnvInt(config Configurator, field string) int {
 }
 
 // GetEnvFloat gets a float from the environment, falling back to the same field name in the config struct.
-// If it doesn't exist in either, the function will log an error then exit 1
+// If it doesn't exist in either, the function will log an error and panic
 func GetEnvFloat(config Configurator, field string) float64 {
 	defer func() {
 		if r := recover(); r != nil {
