@@ -1,4 +1,4 @@
-# Config ![Github Actions](https://github.com/bjubes/config/actions/workflows/tests.yml/badge.svg) [![Go Reference](https://pkg.go.dev/badge/github.com/bjubes/config.svg)](https://pkg.go.dev/github.com/bjubes/config)
+# Config ![Github Actions](https://github.com/bjubes/config/actions/workflows/tests.yml/badge.svg) [![Go Reference](https://pkg.go.dev/badge/github.com/bjubes/config.svg)](https://pkg.go.dev/github.com/bjubes/config) [![codecov](https://codecov.io/gh/bjubes/config/branch/master/graph/badge.svg)](https://codecov.io/gh/bjubes/config)
 
 A go package for creating default configuration variables that can be overridden by environment variables.
 
