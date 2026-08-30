@@ -313,6 +313,34 @@ func TestGetEnvStringStructFieldPanics(t *testing.T) {
 	structFieldIface.GetEnvString("Timeout")
 }
 
+// GetEnvString on a field that exists but is not a string should report a type
+// mismatch ('is not a string'), consistent with GetEnvBool/Int/Float, not the
+// misleading 'has no string field named'.
+func TestGetEnvStringTypeMismatchMessage(t *testing.T) {
+	os.Unsetenv("DB_PORT")
+	defer func() {
+		r := recover()
+		if r == nil {
+			t.Errorf("GetEnvString on a non-string field did not panic")
+			return
+		}
+		var msg string
+		switch v := r.(type) {
+		case string:
+			msg = v
+		case error:
+			msg = v.Error()
+		default:
+			t.Errorf("Unknown panic type '%T'; cannot inspect message", r)
+			return
+		}
+		if !strings.Contains(msg, "is not a string") {
+			t.Errorf("Panic message for a type mismatch should say the field is not a string. Got '%v'", msg)
+		}
+	}()
+	config_iface.GetEnvString("DB_PORT")
+}
+
 func use(vals ...any) {
 	for _, val := range vals {
 		_ = val

@@ -22,6 +22,9 @@ type Configurator interface {
 func GetEnvString(config Configurator, field string) string {
 	defer func() {
 		if r := recover(); r != nil {
+			if reflect.ValueOf(config).FieldByName(field).IsValid() {
+				log.Panicf("configurator field '%s' is not a string", field)
+			}
 			log.Panicf("configurator has no string field named '%s'", field)
 		}
 	}()
