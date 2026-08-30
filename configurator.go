@@ -20,14 +20,7 @@ type Configurator interface {
 // GetEnvString gets a string from the environment, falling back to the same field name in the config struct.
 // If it doesn't exist in either, the function will log an error and panic
 func GetEnvString(config Configurator, field string) string {
-	defer func() {
-		if r := recover(); r != nil {
-			if reflect.ValueOf(config).FieldByName(field).IsValid() {
-				log.Panicf("configurator field '%s' is not a string", field)
-			}
-			log.Panicf("configurator has no string field named '%s'", field)
-		}
-	}()
+	defer panicOnBadField(config, field, "string")
 	value, exists := os.LookupEnv(field)
 	if !exists {
 		value = getString(config, field)
@@ -38,14 +31,7 @@ func GetEnvString(config Configurator, field string) string {
 // GetEnvBool gets a bool from the environment, falling back to the same field name in the config struct.
 // If it doesn't exist in either, the function will log an error and panic
 func GetEnvBool(config Configurator, field string) bool {
-	defer func() {
-		if r := recover(); r != nil {
-			if reflect.ValueOf(config).FieldByName(field).IsValid() {
-				log.Panicf("configurator field '%s' is not a bool", field)
-			}
-			log.Panicf("configurator has no field named '%s'", field)
-		}
-	}()
+	defer panicOnBadField(config, field, "bool")
 	value, err := strconv.ParseBool(os.Getenv(field))
 	if err != nil {
 		value = getBool(config, field)
@@ -56,14 +42,7 @@ func GetEnvBool(config Configurator, field string) bool {
 // GetEnvInt gets an int from the environment, falling back to the same field name in the config struct.
 // If it doesn't exist in either, the function will log an error and panic
 func GetEnvInt(config Configurator, field string) int {
-	defer func() {
-		if r := recover(); r != nil {
-			if reflect.ValueOf(config).FieldByName(field).IsValid() {
-				log.Panicf("configurator field '%s' is not an int", field)
-			}
-			log.Panicf("configurator has no field named '%s'", field)
-		}
-	}()
+	defer panicOnBadField(config, field, "int")
 	value, err := strconv.Atoi(os.Getenv(field))
 	if err != nil {
 		value = getInt(config, field)
@@ -74,14 +53,7 @@ func GetEnvInt(config Configurator, field string) int {
 // GetEnvFloat gets a float from the environment, falling back to the same field name in the config struct.
 // If it doesn't exist in either, the function will log an error and panic
 func GetEnvFloat(config Configurator, field string) float64 {
-	defer func() {
-		if r := recover(); r != nil {
-			if reflect.ValueOf(config).FieldByName(field).IsValid() {
-				log.Panicf("configurator field '%s' is not a float", field)
-			}
-			log.Panicf("configurator has no field named '%s'", field)
-		}
-	}()
+	defer panicOnBadField(config, field, "float")
 	value, err := strconv.ParseFloat(os.Getenv(field), 64)
 	if err != nil {
 		value = getFloat(config, field)
@@ -120,6 +92,18 @@ func getInt(c any, field string) int {
 // the field is not present
 func getFloat(c any, field string) float64 {
 	return getNonString(c, field).Float()
+}
+
+// panicOnBadField is deferred by the GetEnv* functions. It inspects a panic
+// that bubbled up from reading a mis-typed or missing field and re-panics with
+// a message that says which type was expected.
+func panicOnBadField(config Configurator, field, typeName string) {
+	if r := recover(); r != nil {
+		if reflect.ValueOf(config).FieldByName(field).IsValid() {
+			log.Panicf("configurator field '%s' is not a %s", field, typeName)
+		}
+		log.Panicf("configurator has no %s field named '%s'", typeName, field)
+	}
 }
 
 func getNonString(c any, field string) reflect.Value {
