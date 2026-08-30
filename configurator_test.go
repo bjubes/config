@@ -60,11 +60,11 @@ func TestReadValues(t *testing.T) {
 	}
 
 	if prod != config_struct.PROD {
-		t.Fatalf("Getting bool value failed. Got '%v'. want '%v'", port, config_struct.PROD)
+		t.Fatalf("Getting bool value failed. Got '%v'. want '%v'", prod, config_struct.PROD)
 	}
 
 	if cooldown != config_struct.COOLDOWN {
-		t.Fatalf("Getting float value failed. Got '%v'. want '%v'", port, config_struct.COOLDOWN)
+		t.Fatalf("Getting float value failed. Got '%v'. want '%v'", cooldown, config_struct.COOLDOWN)
 	}
 }
 
@@ -117,11 +117,11 @@ func TestConfigFallbackToEnv(t *testing.T) {
 	}
 
 	if prod != config_struct.PROD {
-		t.Fatalf("Getting bool value failed. Got '%v'. want '%v'", port, config_struct.DB_PORT)
+		t.Fatalf("Getting bool value failed. Got '%v'. want '%v'", prod, config_struct.PROD)
 	}
 
 	if cooldown != config_struct.COOLDOWN {
-		t.Fatalf("Getting float value failed. Got '%v'. want '%v'", port, config_struct.COOLDOWN)
+		t.Fatalf("Getting float value failed. Got '%v'. want '%v'", cooldown, config_struct.COOLDOWN)
 	}
 
 }
