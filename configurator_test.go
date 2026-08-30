@@ -346,6 +346,73 @@ func TestGetEnvStringTypeMismatchMessage(t *testing.T) {
 	config_iface.GetEnvString("DB_PORT")
 }
 
+// Embedded-struct setup. embeddedInner is embedded in embeddedConfig to test
+// promoted field access. The 'Shadow' field exists at both levels to test that
+// the shallowest definition wins, matching normal Go field-promotion rules.
+type embeddedInner struct {
+	Name   string
+	Inner  int
+	Shadow int
+}
+
+type embeddedConfig struct {
+	embeddedInner
+	Shadow int
+	Other  int
+}
+
+var embedded_struct = embeddedConfig{
+	embeddedInner: embeddedInner{Name: "hello", Inner: 42, Shadow: 99},
+	Shadow:        7,
+	Other:         8,
+}
+
+func TestEmbeddedPromotedFields(t *testing.T) {
+	if got := getInt(embedded_struct, "Inner"); got != 42 {
+		t.Fatalf("Getting promoted int value failed. Got '%v'. want '%v'", got, 42)
+	}
+
+	if got := getString(embedded_struct, "Name"); got != "hello" {
+		t.Fatalf("Getting promoted string value failed. Got '%v'. want '%v'", got, "hello")
+	}
+
+	if got := getInt(embedded_struct, "Other"); got != 8 {
+		t.Fatalf("Getting outer value failed. Got '%v'. want '%v'", got, 8)
+	}
+}
+
+func TestEmbeddedShadowedField(t *testing.T) {
+	// normal Go access picks the shallowest (outer) definition
+	if embedded_struct.Shadow != 7 {
+		t.Fatalf("expected outer field access to be 7, got %d", embedded_struct.Shadow)
+	}
+	// the package must agree with Go's promotion rules
+	if got := getInt(embedded_struct, "Shadow"); got != 7 {
+		t.Fatalf("expected 7 (shallowest definition), got %d", got)
+	}
+}
+
+// Two embedded structs with the same field name at the same depth is
+// ambiguous in Go itself, and the package must panic.
+type ambiguousA struct{ Val int }
+type ambiguousB struct{ Val int }
+
+type ambiguousConfig struct {
+	ambiguousA
+	ambiguousB
+}
+
+func TestEmbeddedAmbiguousFieldPanics(t *testing.T) {
+	c := ambiguousConfig{ambiguousA{Val: 1}, ambiguousB{Val: 2}}
+	defer func() {
+		if r := recover(); r == nil {
+			t.Errorf("Reading an ambiguous promoted field did not cause panic")
+		}
+	}()
+	value := getInt(c, "Val")
+	use(value)
+}
+
 func use(vals ...any) {
 	for _, val := range vals {
 		_ = val

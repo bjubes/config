@@ -52,8 +52,31 @@ go get github.com/bjubes/config
 Values will default to what they are set to in the struct instance, but will be overridden by environment variables if they are set.
 Environment variables must match the type specified. For specifics, see [type matching rules](#type-matching-rules) below.
 
-Since the `myConfig` instance has a type of `Configurator`, none of the public fields are accesssable. This forces retreiving values through the `GetEnv` methods, so you never accidentally grab the default value without checking for the environment variable first.
+Since the `myConfig` instance has a type of `Configurator`, none of the public fields are accessible. This forces retrieving values through the `GetEnv` methods, so you never accidentally grab the default value without checking for the environment variable first.
 
+
+### Struct embedding
+Fields promoted from embedded structs are fully supported. All `GetEnv` methods resolve a field name through the same promotion rules as normal Go field access, so it works with a config that embeds another struct:
+```go
+type DBConfig struct {
+	DB_HOST  string
+	DB_PORT  int
+}
+
+type MyConfig struct {
+	DBConfig
+	PROD     bool
+	COOLDOWN float64
+}
+
+//Configurator implementation and usage remains the same
+func (c MyConfig) GetEnvString(field string) string {
+	return config.GetEnvString(c, field)
+}
+host := myConfig.GetEnvString("DB_HOST")
+```
+
+If a field name appears at more than one embedded level, the shallowest definition wins. If two embedded structs provide the same field name at the same depth, the name is ambiguous and the `GetEnv` methods will panic.
 
 ### Type matching rules
 _If the environment variable doesn't meet these rules the default value will be used instead._
