@@ -69,6 +69,9 @@ func TestReadValues(t *testing.T) {
 }
 
 func TestEnvOverridesConfig(t *testing.T) {
+	for _, f := range []string{"DB_HOST", "DB_PORT", "PROD", "COOLDOWN"} {
+		t.Cleanup(func() { os.Unsetenv(f) })
+	}
 	os.Setenv("DB_HOST", "newhost")
 	os.Setenv("DB_PORT", "2")
 	os.Setenv("PROD", "false")
@@ -170,6 +173,7 @@ func TestWrongFloatFieldCausesPanic(t *testing.T) {
 }
 
 func TestBoolWithVariousEnvStrings(t *testing.T) {
+	t.Cleanup(func() { os.Unsetenv("PROD") })
 	falses := []string{
 		"0", "f", "F", "FALSE", "false", "False",
 	}
@@ -194,6 +198,7 @@ func TestBoolWithVariousEnvStrings(t *testing.T) {
 }
 
 func TestBoolWithBadEnvStrings(t *testing.T) {
+	t.Cleanup(func() { os.Unsetenv("PROD") })
 	invalid_bool_strings := []string{
 		"off", "on", "yes", "no", "y", "n", "nope", "nada", "anything", "",
 	}
