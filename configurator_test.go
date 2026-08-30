@@ -285,6 +285,34 @@ func TestPanicOnExistingFieldWrongType(t *testing.T) {
 	field_type = "string"
 	panicCheck(func() { config_iface.GetEnvString("DB_PORT") })
 }
+// Struct-typed field used to exercise GetEnvString's non-string handling.
+type timeValue struct {
+	Seconds int
+}
+
+type structFieldConfig struct {
+	Timeout timeValue
+}
+
+var structFieldIface Configurator = &structFieldConfig{Timeout: timeValue{Seconds: 5}}
+
+func (c structFieldConfig) GetEnvString(field string) string { return GetEnvString(c, field) }
+func (c structFieldConfig) GetEnvBool(field string) bool     { return GetEnvBool(c, field) }
+func (c structFieldConfig) GetEnvInt(field string) int       { return GetEnvInt(c, field) }
+func (c structFieldConfig) GetEnvFloat(field string) float64 { return GetEnvFloat(c, field) }
+
+// With the env var unset, GetEnvString on a struct-typed field must panic
+// instead of returning the bogus '<...Value>' debug string.
+func TestGetEnvStringStructFieldPanics(t *testing.T) {
+	os.Unsetenv("Timeout")
+	defer func() {
+		if r := recover(); r == nil {
+			t.Errorf("GetEnvString on a struct-typed field did not panic; it returned the bogus '<...Value>' debug string instead")
+		}
+	}()
+	structFieldIface.GetEnvString("Timeout")
+}
+
 func use(vals ...any) {
 	for _, val := range vals {
 		_ = val

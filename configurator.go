@@ -4,7 +4,6 @@ import (
 	"log"
 	"os"
 	"reflect"
-	"regexp"
 	"strconv"
 )
 
@@ -88,18 +87,18 @@ func GetEnvFloat(config Configurator, field string) float64 {
 }
 
 // getString gets the value of an string field in the config struct. Panics if
-// the field is not present
+// the field is not present or not a string
 func getString(c any, field string) string {
 	c_value := reflect.ValueOf(c)
 	field_value := reflect.Indirect(c_value).FieldByName(field)
 
-	//String() doesn't panic. It returns '<T Value>' if the field doesn't exist
-	result := field_value.String()
-	re := regexp.MustCompile(`<[a-zA-Z]*\sValue>`)
-	if re.MatchString(result) {
+	if !field_value.IsValid() {
 		log.Panicf("configurator has no field named '%s'", field)
 	}
-	return result
+	if field_value.Kind() != reflect.String {
+		log.Panicf("configurator field '%s' is not a string", field)
+	}
+	return field_value.String()
 }
 
 // getBool gets the value of a bool field in the config struct. Panics if
